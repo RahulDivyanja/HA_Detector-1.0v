@@ -28,10 +28,11 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // http://192.168.8.164:3000
+  const SOCKET_URL = process.env.EXPO_PUBLIC_SOCKET_URL || 'https://ha-detector-backend-production.up.railway.app';
+
   useEffect(() => {
     // Connect to the Socket.IO server
-    const socket = io('https://ha-detector-backend-production.up.railway.app');
+    const socket = io(SOCKET_URL);
 
     socket.on('connect', () => {
       console.log('Connected to the server');
@@ -93,6 +94,22 @@ export default function HomeScreen() {
     };
   }, []);
 
+  // Save push token to backend when it's available
+  useEffect(() => {
+    if (expoPushToken && !expoPushToken.startsWith('Error')) {
+      fetch('https://ha-detector-backend-production.up.railway.app/api/save-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ expoPushToken }),
+      })
+        .then(response => response.json())
+        .then(data => console.log('Token saved successfully:', data))
+        .catch(error => console.error('Error saving token:', error));
+    }
+  }, [expoPushToken]);
+
   if (loading) {
     return (
       <View style={[styles.container, styles.center]}>
@@ -108,17 +125,6 @@ export default function HomeScreen() {
       </View>
     );
   }
-  fetch('https://ha-detector-backend-production.up.railway.app/api/save-token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ expoPushToken }),
-  })
-    .then(response => response.json())
-    .then(data => console.log('Token saved successfully:', data))
-    .catch(error => console.error('Error saving token:', error));
-
 
   return (
     <View style={styles.container}>

@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, StyleSheet, Image, Platform, Text, TouchableOpacity, Linking } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 
